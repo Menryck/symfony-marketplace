@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/annonce")
+ * @Route("/admin/annonce")
  */
 class AnnonceController extends AbstractController
 {
@@ -21,7 +21,10 @@ class AnnonceController extends AbstractController
     public function index(AnnonceRepository $annonceRepository): Response
     {
         return $this->render('annonce/index.html.twig', [
-            'annonces' => $annonceRepository->findAll(),
+            // 'annonces' => $annonceRepository->findAll(), // TROP BASIQUE, AFFICHE TOUJOURS DANS L'ORDRE D'ID CROISSANT
+            // https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/reference/working-with-objects.html#by-simple-conditions
+            // TRI PAR id DECROISSANT
+            'annonces' => $annonceRepository->findBy([], [ "id" => "DESC" ]),
         ]);
     }
 
