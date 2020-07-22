@@ -49,7 +49,7 @@ class User implements UserInterface
     private $annonces;
 
     /**
-     * @ORM\Column(type="string", length=160)
+     * @ORM\Column(type="string", length=160, unique=true)
      */
     private $username;
 

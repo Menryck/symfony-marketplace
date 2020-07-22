@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Annonce;
+use App\Form\AnnonceType;
 use App\Repository\AnnonceRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,10 +52,23 @@ class MarketplaceController extends AbstractController
     /**
      * @Route("/membre", name="membre")
      */
-    public function membre()
+    public function new(Request $request): Response
     {
-        return $this->render('marketplace/membre.html.twig', [
-            'controller_name' => 'MarketplaceController',
+        $annonce = new Annonce();
+        $form = $this->createForm(AnnonceType::class, $annonce);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($annonce);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('annonce_index');
+        }
+
+        return $this->render('annonce/new.html.twig', [
+            'annonce' => $annonce,
+            'form' => $form->createView(),
         ]);
     }
 

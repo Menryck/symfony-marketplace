@@ -8,7 +8,10 @@
     {% endfor %}
 <section class="container">
     <h1>S'inscrire</h1>
-
+    {{ form_start(registrationForm) }}
+        {{ form_row(registrationForm.username, {
+            label: 'Username'
+        }) }}
     {{ form_start(registrationForm) }}
         {{ form_row(registrationForm.email, {
             label: 'Adresse email'
