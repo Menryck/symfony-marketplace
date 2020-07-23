@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+// POUR JSON
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 
 class MarketplaceController extends AbstractController
 {
@@ -116,5 +119,46 @@ class MarketplaceController extends AbstractController
             'form'                  => $form->createView(),
         ]);
     }
+
+
+    /**
+     * @Route("/apijson", name="apijson", methods={"GET","POST"})
+     */
+    public function apijson(Request $request, AnnonceRepository $annonceRepository): Response
+    {
+        // ON VA RENVOYER DU JSON
+        // https://symfony.com/doc/current/components/http_foundation.html
+        // https://symfony.com/doc/current/components/http_foundation.html#creating-a-json-response
+
+        $tabAssoJson = [];
+        // ON RAJOUTE LES INFOS DANS LE TABLEAU ASSOCIATIF
+        $tabAssoJson["date"] = date("H:i:s");
+
+        // LISTE DES ANNONCES
+        $listeAnnonce = $annonceRepository->findBy([], [ "datePublication" => "DESC" ]);
+        // ON CONVERTIR NOS ENTITES EN TABLEAU ASSOCIATIF
+        $tabAnnonces = [];
+        foreach($listeAnnonce as $annonce)
+        {
+            $tabAnnonces[] = $annonce->getTabJson();
+        }
+        $tabAssoJson["annonces"] = $tabAnnonces;
+
+        // ON RANGE LE TABLEAU ASSO DANS UN OBJET DE CLASSE JsonResponse
+        $objetJsonResponse = new JsonResponse($tabAssoJson);
+        // ON RENVOIE L'OBJET
+        return $objetJsonResponse;
+        
+    }
+
+    /**
+     * @Route("/front-in-symfony", name="front-in-symfony")
+     */
+    public function frontInSymfony()
+    {
+        return $this->render('marketplace/front-in-symfony.html.twig', [
+        ]);
+    }
+
 
 }

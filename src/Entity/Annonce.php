@@ -3,12 +3,18 @@
 namespace App\Entity;
 
 use App\Repository\AnnonceRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+// POUR API PLATFORM
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=AnnonceRepository::class)
+ * @ApiResource(
+ *     attributes={"pagination_items_per_page"=100},
+ *     normalizationContext={"groups"={"scenario1"}},
+ *     denormalizationContext={"groups"={"scenario2"}}
+ * ) 
  */
 class Annonce
 {
@@ -16,13 +22,15 @@ class Annonce
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"scenario1", "scenario2"})
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string", length=160)
+     * @Groups({"scenario1", "scenario2"})
      */
-    private $titre;
+    public $titre;
 
     /**
      * @ORM\Column(type="string", length=160)
@@ -31,13 +39,15 @@ class Annonce
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"scenario1"})
      */
-    private $description;
+    public $description;
 
     /**
      * @ORM\Column(type="string", length=160)
+     * @Groups({"scenario1", "scenario2"})
      */
-    private $photo;
+    public $photo;
 
     /**
      * @ORM\Column(type="datetime")
@@ -49,16 +59,6 @@ class Annonce
      * @ORM\JoinColumn(nullable=false)
      */
     private $user;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Categorie::class, mappedBy="annonces")
-     */
-    private $categories;
-
-    public function __construct()
-    {
-        $this->categories = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -137,31 +137,16 @@ class Annonce
         return $this;
     }
 
-    /**
-     * @return Collection|Categorie[]
-     */
-    public function getCategories(): Collection
+    public function getTabJson ()
     {
-        return $this->categories;
-    }
+        $tabAsso = [];
+        // ON VA CONVERTIR L'OBJET EN TABLEAU ASSOCIATIF
+        $tabAsso["id"]          = $this->id;
+        $tabAsso["titre"]       = $this->titre;
+        $tabAsso["description"] = $this->description;
+        $tabAsso["photo"]       = $this->photo;
 
-    public function addCategory(Categorie $category): self
-    {
-        if (!$this->categories->contains($category)) {
-            $this->categories[] = $category;
-            $category->addAnnonce($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCategory(Categorie $category): self
-    {
-        if ($this->categories->contains($category)) {
-            $this->categories->removeElement($category);
-            $category->removeAnnonce($this);
-        }
-
-        return $this;
+        // ...
+        return $tabAsso;
     }
 }
