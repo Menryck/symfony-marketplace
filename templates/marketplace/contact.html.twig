@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CONTACTEZ NOUS{% endblock %}
+
+{% block body %}
+
+        <section class="container">
+            <h2>FORMULAIRE DE CONTACT</h2>
+
+            {{ form_start(form) }}
+                {{ form_row(form.email, { 'value' : app.user.email ?? '' }) }}
+                {{ form_widget(form) }}
+                <button class="btn btn-primary">{{ button_label|default('ENVOYER VOTRE MESSAGE') }}</button>
+                <div class="confirmation">
+                    {{ messageConfirmation ?? "" }}
+                </div>
+            {{ form_end(form) }}
+
+        </section>
+
+{% endblock %}

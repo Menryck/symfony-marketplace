@@ -24,22 +24,29 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('annonces') }}">Annonces</a>
                     </li>
+                {% if (app.user.username ?? false) %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url('membre') }}">Espace Membre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url('app_logout') }}">déconnexion</a>
+                    </li>
+                {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('app_register') }}">Inscription</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('membre') }}">Espace Membre</a>
                     </li>
-                    {% if (app.user.username ?? false) %}
+                {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url('app_logout') }}">Déconnexion</a>
+                        <a class="nav-link" href="{{ url('contact') }}">Contact</a>
                     </li>
-                    {% endif %}
                 </ul>
             </nav>
         </header>
 
-        <main>
+        <main class="container-fluid p-0">
             {% block body %}{% endblock %}
         </main>
 
@@ -59,6 +66,11 @@
 
         <!-- HTML POUR LIGHTBOX -->
         <div class="container-fluid lightbox">
+            <div class="text-right w-100">
+                <button type="button" class="btn-light close" aria-label="Close">
+                <span aria-hidden="true">&times; fermer</span>
+                </button>
+            </div>
             <img src="https://picsum.photos/800/800" alt="">
         </div>
 

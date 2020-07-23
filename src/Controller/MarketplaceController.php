@@ -3,14 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Annonce;
+use App\Entity\Contact;
+use App\Form\ContactType;
 use App\Form\AnnonceMembreType;
 use App\Repository\AnnonceRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 // POUR JSON
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 class MarketplaceController extends AbstractController
@@ -56,17 +58,20 @@ class MarketplaceController extends AbstractController
     /**
      * @Route("/membre", name="membre", methods={"GET","POST"})
      */
-    public function membre(Request $request): Response
+    public function membre(Request $request, AnnonceRepository $annonceRepository): Response
     {
+        $userConnecte = $this->getUser();
+
         $annonce = new Annonce();
         $form = $this->createForm(AnnonceMembreType::class, $annonce);
         $form->handleRequest($request);
 
         $messageConfirmation = "VALEUR PAR DEFAUT FOURNIE PAR PHP";
         if ($form->isSubmitted() && $form->isValid()) {
+            // CODE QUI TRAITE LE FORMULAIRE DE CREATION D'UNE ANNONCE
+
             // COMPLETER LES INFOS MANQUANTES
             // AJOUTER L'AUTEUR GRACE A L'UTILISATEUR CONNECTE
-            $userConnecte = $this->getUser();
             $annonce->setUser($userConnecte);
 
             // https://www.php.net/manual/fr/class.datetime.php
@@ -117,6 +122,9 @@ class MarketplaceController extends AbstractController
             'messageConfirmation'   => $messageConfirmation,
             'annonce'               => $annonce,
             'form'                  => $form->createView(),
+            // affichage des annonces
+            'annonces'              => $annonceRepository->findBy([ "user" => $userConnecte->getId() ], [ "datePublication" => "DESC" ]),
+
         ]);
     }
 
@@ -160,5 +168,33 @@ class MarketplaceController extends AbstractController
         ]);
     }
 
+
+    /**
+     * @Route("/contact", name="contact", methods={"GET","POST"})
+     */
+    public function contact(Request $request): Response
+    {
+        $messageConfirmation = "";
+        $contact = new Contact();
+        $form = $this->createForm(ContactType::class, $contact);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $dateActuelle = new \DateTime();
+            $contact->setDateMessage($dateActuelle);
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($contact);
+            $entityManager->flush();
+
+            $messageConfirmation = "Votre message a bien été transmis";
+        }
+
+        // PAGE PUBLIQUE POUR LES VISITEURS
+        return $this->render('marketplace/contact.html.twig', [
+            'contact'               => $contact,
+            'form'                  => $form->createView(),
+            'messageConfirmation'   => $messageConfirmation,
+        ]);
+    }
 
 }
