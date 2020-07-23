@@ -1,9 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MarketplaceController!{% endblock %}
+{% block title %}Espace Membre{% endblock %}
 
 {% block body %}
+
     <section class="container">
         <h2>ESPACE MEMBRE</h2>
+        <h3>BIENVENUE {{ app.user.username }}</h3>
+    </section>
+
+    <section class="container">
+        <h2>FORMULAIRE POUR CREER UNE ANNONCE</h2>
+
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+            <div class="confirmation">
+            {{ messageConfirmation ?? "" }}
+            </div>
+        {{ form_end(form) }}
+
     </section>
 {% endblock %}

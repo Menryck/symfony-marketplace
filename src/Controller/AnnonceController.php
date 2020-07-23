@@ -4,11 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Annonce;
 use App\Form\AnnonceType;
+use App\Form\AnnonceEditType;
 use App\Repository\AnnonceRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * @Route("/admin/annonce")
@@ -21,7 +23,8 @@ class AnnonceController extends AbstractController
     public function index(AnnonceRepository $annonceRepository): Response
     {
         return $this->render('annonce/index.html.twig', [
-            // 'annonces' => $annonceRepository->findAll(), // TROP BASIQUE, AFFICHE TOUJOURS DANS L'ORDRE D'ID CROISSANT
+            
+            // 'annonces' => $annonceRepository->findAll(),    // TROP BASIQUE
             // https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/reference/working-with-objects.html#by-simple-conditions
             // TRI PAR id DECROISSANT
             'annonces' => $annonceRepository->findBy([], [ "id" => "DESC" ]),
@@ -31,18 +34,31 @@ class AnnonceController extends AbstractController
     /**
      * @Route("/new", name="annonce_new", methods={"GET","POST"})
      */
-    public function new(Request $request): Response
+    public function new(Request $request, SluggerInterface $slugger): Response
     {
         $annonce = new Annonce();
         $form = $this->createForm(AnnonceType::class, $annonce);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
+
+                    $photoFile->move(
+                        $this->getParameter('upload_directory'),
+                        $newFilename
+                    );
+                $annonce->setPhoto($newFilename);
+                }
+            
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($annonce);
             $entityManager->flush();
 
-            return $this->redirectToRoute('annonce_index');
+            // return $this->redirectToRoute('annonce_index');
         }
 
         return $this->render('annonce/new.html.twig', [
@@ -64,12 +80,24 @@ class AnnonceController extends AbstractController
     /**
      * @Route("/{id}/edit", name="annonce_edit", methods={"GET","POST"})
      */
-    public function edit(Request $request, Annonce $annonce): Response
+    public function edit(Request $request, Annonce $annonce, SluggerInterface $slugger): Response
     {
-        $form = $this->createForm(AnnonceType::class, $annonce);
+        $form = $this->createForm(AnnonceEditType::class, $annonce);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$photoFile->guessExtension();
+
+                    $photoFile->move(
+                        $this->getParameter('upload_directory'),
+                        $newFilename
+                    );
+                $annonce->setPhoto($newFilename);
+                }
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute('annonce_index');

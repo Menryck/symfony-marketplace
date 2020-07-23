@@ -2,15 +2,15 @@ h1 {
     color:orange;
 }
 
-article img {
-    max-height: 50vmin;
+article img.img-thumbnail {
+    height: 30vmin;
+    width:100%;
+    object-fit: cover;
 }
-
 footer {
-    padding: 4rem;
+    padding-top:4rem;
 }
 
-/* CSS POUR LIGHTBOX */
 .lightbox {
     position:fixed;
     top:100%;
@@ -24,13 +24,19 @@ footer {
     align-items: center;
     opacity:0;
     transition: all 0.3s linear;
+    flex-direction: column;
 }
 .lightbox.afficher {
     opacity:1;
     top:0%;
 }
 .lightbox img {
-    object-fit: cover;
+    object-fit: contain;
     width:80%;
     height:80%;
+}
+
+.carousel-item img {
+    height:40vmin;
+    object-fit: cover;
 }
